@@ -352,36 +352,60 @@ function App() {
         )
     }
 
-  return (
-        <main>
-            <h1>Ты приглашён!</h1>
+    return (
+        <main className="page">
+            <section className="card welcome-card">
+                <p className="eyebrow">ПРИГЛАШЕНИЕ</p>
 
-            <p>Буду рада видеть тебя на моём празднике 💌</p>
+                <h1>Ты приглашён!</h1>
 
-            <p>📅 26 сентября</p>
-            <p>🕐 17:00</p>
-            <p>📍 Гродно</p>
+                <p className="subtitle">
+                    Буду рада видеть тебя на моём празднике 💌
+                </p>
 
-            <p>Как тебя зовут?</p>
+                <div className="event-info">
+                    <div>
+                        <span>📅</span>
+                        <strong>26 сентября</strong>
+                    </div>
 
-            <input
-                type="text"
-                placeholder="Твоё имя"
-                value={guestName}
-                onChange={(event) => setGuestName(event.target.value)}
-            />
+                    <div>
+                        <span>🕐</span>
+                        <strong>17:00</strong>
+                    </div>
 
-            <br />
-            <br />
+                    <div>
+                        <span>📍</span>
+                        <strong>Гродно</strong>
+                    </div>
+                </div>
 
-            <button
-                onClick={() => setScreen('food')}
-                disabled={!guestName.trim()}
-            >
-                Открыть приглашение
-            </button>
+                <div className="form-section">
+                    <label htmlFor="guest-name">
+                        Как тебя зовут?
+                    </label>
+
+                    <input
+                        id="guest-name"
+                        type="text"
+                        placeholder="Твоё имя"
+                        value={guestName}
+                        onChange={(event) =>
+                            setGuestName(event.target.value)
+                        }
+                    />
+                </div>
+
+                <button
+                    className="primary-button"
+                    onClick={() => setScreen('food')}
+                    disabled={!guestName.trim()}
+                >
+                    Открыть приглашение
+                </button>
+            </section>
         </main>
-  )
+    )
 }
 
 export default App
