@@ -1,31 +1,46 @@
 import { useEffect, useState } from 'react'
 
-const API_URL = import.meta.env.VITE_API_URL
-
 const foodOptions = [
-  '🍕 Пицца',
-  '🍔 Бургеры',
-  '🍣 Суши',
-  '🍗 Мясо',
-  '🥗 Салаты',
-  '🍟 Закуски',
-  '🍰 Десерты',
+  'Пицца',
+  'Суши',
+  'Шашлык',
+  'Салаты',
+  'Закуски',
+  'Торт',
 ]
 
 const drinkOptions = [
-  '🥤 Газировка',
-  '🧃 Сок',
-  '💧 Вода',
-  '☕ Кофе',
-  '🍵 Чай',
+  'Газировка',
+  'Сок',
+  'Вода',
+  'Чай/кофе',
+]
+
+const wishlistItems = [
+    {
+        id: 1,
+        title: 'Наушники',
+        description: 'Хорошие беспроводные наушники',
+        price: 150,
+        link: 'https://example.com',
+    },
+    {
+        id: 2,
+        title: 'Книга',
+        description: 'Книга, которую я давно хочу',
+        price: 40,
+        link: 'https://example.com',
+    },
+    {
+        id: 3,
+        title: 'Что-нибудь для дома',
+        description: 'На твой вкус ❤️',
+        price: 50,
+        link: 'https://example.com',
+    },
 ]
 
 function App() {
-    const adminMode = window.location.pathname === '/admin'
-
-    const [adminPassword, setAdminPassword] = useState('')
-    const [isAdmin, setIsAdmin] = useState(false)
-
     const [screen, setScreen] = useState('welcome')
 
     const [guestName, setGuestName] = useState('')
@@ -34,98 +49,84 @@ function App() {
     const [drinkPreferences, setDrinkPreferences] = useState<string[]>([])
 
     const [customFood, setCustomFood] = useState('')
-    const [customDrink, setCustomDrink] = useState('')
 
     const [foodRestrictions, setFoodRestrictions] = useState('')
     const [drinkRestrictions, setDrinkRestrictions] = useState('')
 
     const [selectedGift, setSelectedGift] = useState<number | null>(null)
 
-    const [wishlistItems, setWishlistItems] = useState<any[]>([])
-    const [wishlistLoaded, setWishlistLoaded] = useState(false)
+    const [alcohol, setAlcohol] = useState('')
 
-    const [guests, setGuests] = useState<any[]>([])
-    const [guestsLoaded, setGuestsLoaded] = useState(false)
+    const [reservedGifts, setReservedGifts] = useState<number[]>([])
+
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     useEffect(() => {
-        if (!adminMode || guestsLoaded) {
+        fetch(
+            'https://script.google.com/macros/s/AKfycbyE5a5-bHr3f2u6cq9TS8tajLeitD3qaRwM8XNocZK9ioqelvxienaE7r7OXXpn1U5d/exec?action=gifts'
+        )
+            .then((response) => response.json())
+            .then((data) => {
+                setReservedGifts(data.reservedGifts || [])
+            })
+            .catch((error) => {
+                console.error('Ошибка загрузки подарков:', error)
+            })
+    }, [])
+
+    const submitGuest = async () => {
+        if (!guestName.trim()) {
+            alert('Пожалуйста, введи своё имя')
             return
         }
 
-        fetch(`${API_URL}/api/guests`)
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`)
-                }
-
-                return response.json()
-            })
-            .then((data) => {
-                console.log('Гости загружены:', data)
-
-                setGuests(data)
-                setGuestsLoaded(true)
-            })
-            .catch((error) => {
-                console.error('Ошибка загрузки гостей:', error)
-            })
-    }, [adminMode, guestsLoaded])
-
-    useEffect(() => {
-        if (!wishlistLoaded && (screen === 'wishlist' || adminMode)) {
-            fetch(`${API_URL}/api/wishlist`)
-                .then((response) => response.json())
-                .then((data) => {
-                    setWishlistItems(data)
-                    setWishlistLoaded(true)
-                })
-                .catch((error) => {
-                    console.error('Ошибка загрузки вишлиста:', error)
-                })
+        if (isSubmitting) {
+            return
         }
-    }, [screen, adminMode, wishlistLoaded])
 
-    const submitGuest = async () => {
-        const guest = {
+        setIsSubmitting(true)
+
+        const params = new URLSearchParams({
             name: guestName,
-            foodPreferences: [
-                ...foodPreferences,
-                ...(customFood.trim() ? [`✏️ ${customFood.trim()}`] : []),
-            ],
-            foodRestrictions,
-            drinkPreferences: [
-                ...drinkPreferences,
-                ...(customDrink.trim() ? [`✏️ ${customDrink.trim()}`] : []),
-            ],
-            drinkRestrictions,
-            selectedGift,
-        }
+            food: foodPreferences.join(', '),
+            customFood: customFood,
+            foodRestrictions: foodRestrictions,
+            drink: drinkPreferences.join(', '),
+            alcohol: alcohol,
+            drinkRestrictions: drinkRestrictions,
+            gift: selectedGift ? String(selectedGift) : '',
+        })
 
         try {
             const response = await fetch(
-                `${API_URL}/api/guests`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(guest),
-                }
+                `https://script.google.com/macros/s/AKfycbyE5a5-bHr3f2u6cq9TS8tajLeitD3qaRwM8XNocZK9ioqelvxienaE7r7OXXpn1U5d/exec?${params.toString()}`
             )
 
-            const data = await response.json()
+            const result = await response.json()
 
-            if (!response.ok) {
-                alert(data.message)
+            if (result.ok) {
+                setScreen('finish')
                 return
             }
 
-            console.log('Гость сохранён:', data)
+            if (result.error === 'gift_already_reserved') {
+                alert('К сожалению, этот подарок уже выбрал кто-то другой 🎁')
 
-            setScreen('finish')
+                const giftsResponse = await fetch(
+                    'https://script.google.com/macros/s/AKfycbyE5a5-bHr3f2u6cq9TS8tajLeitD3qaRwM8XNocZK9ioqelvxienaE7r7OXXpn1U5d/exec?action=gifts'
+                )
+
+                const giftsData = await giftsResponse.json()
+
+                setReservedGifts(giftsData.reservedGifts || [])
+                setIsSubmitting(false)
+                setScreen('wishlist')
+            }
         } catch (error) {
             console.error('Ошибка отправки:', error)
-            alert('Не удалось сохранить ответы')
+
+            alert('Не удалось отправить ответ. Попробуй ещё раз.')
+            setIsSubmitting(false)
         }
     }
 
@@ -145,119 +146,7 @@ function App() {
     )
   }
 
-    if (adminMode && !isAdmin) {
-        return (
-            <main>
-                <h1>🔐 Админка</h1>
 
-                <p>Введите пароль:</p>
-
-                <input
-                    type="password"
-                    value={adminPassword}
-                    onChange={(event) =>
-                        setAdminPassword(event.target.value)
-                    }
-                />
-
-                <br />
-                <br />
-
-                <button
-                    onClick={() => {
-                        if (adminPassword === '1234') {
-                            setIsAdmin(true)
-                        } else {
-                            alert('Неверный пароль')
-                        }
-                    }}
-                >
-                    Войти
-                </button>
-            </main>
-        )
-    }
-
-    if (adminMode && isAdmin) {
-        return (
-            <main>
-                <h1>🔐 Админка</h1>
-
-                <h2>👥 Гости</h2>
-
-                {!guestsLoaded && (
-                    <p>Загружаем гостей...</p>
-                )}
-
-                {guests.map((guest) => (
-                    <div key={guest.id}>
-                        <h3>{guest.name}</h3>
-
-                        <p>
-                            🍕 Еда:{' '}
-                            {JSON.parse(
-                                guest.food_preferences || '[]'
-                            ).join(', ')}
-                        </p>
-
-                        <p>
-                            🚫 Не ест:{' '}
-                            {guest.food_restrictions || '—'}
-                        </p>
-
-                        <p>
-                            🥤 Напитки:{' '}
-                            {JSON.parse(
-                                guest.drink_preferences || '[]'
-                            ).join(', ')}
-                        </p>
-
-                        <p>
-                            🚫 Не пьёт:{' '}
-                            {guest.drink_restrictions || '—'}
-                        </p>
-
-                        <p>
-                            🎁 Подарок ID:{' '}
-                            {guest.selected_gift || 'Не выбран'}
-                        </p>
-
-                        <p>
-                            📅 {guest.created_at}
-                        </p>
-
-                        <hr />
-                    </div>
-                ))}
-
-                <h2>🎁 Вишлист</h2>
-
-                {!wishlistLoaded && (
-                    <p>Загружаем вишлист...</p>
-                )}
-
-                {wishlistItems.map((item) => (
-                    <div key={item.id}>
-                        <h3>
-                            #{item.id} — {item.title}
-                        </h3>
-
-                        <p>{item.description}</p>
-
-                        <p>💰 {item.price} BYN</p>
-
-                        <p>
-                            {item.reserved
-                                ? '🔴 Подарок выбран'
-                                : '🟢 Подарок свободен'}
-                        </p>
-
-                        <hr />
-                    </div>
-                ))}
-            </main>
-        )
-    }
 
   if (screen === 'food') {
     return (
@@ -299,59 +188,76 @@ function App() {
           <br />
           <br />
 
-          <button onClick={() => setScreen('drinks')}>
-            Дальше →
-          </button>
+            <button onClick={() => setScreen('drinks')}>
+                Дальше →
+            </button>
+
+            <br />
+            <br />
+
+            <button onClick={() => setScreen('welcome')}>
+                ← Назад
+            </button>
         </main>
     )
   }
 
-  if (screen === 'drinks') {
-    return (
-        <main>
-          <h1>🥤 Напитки</h1>
+    if (screen === 'drinks') {
+        return (
+            <main>
+                <h1>🥤 Напитки</h1>
 
-          <p>Что ты будешь пить?</p>
+                <p>Что ты будешь пить?</p>
 
-          {drinkOptions.map((drink) => (
-              <button
-                  key={drink}
-                  onClick={() => toggleDrink(drink)}
-              >
-                {drink} {drinkPreferences.includes(drink) ? '✓' : ''}
-              </button>
-          ))}
+                {drinkOptions.map((drink) => (
+                    <button
+                        key={drink}
+                        onClick={() => toggleDrink(drink)}
+                    >
+                        {drink} {drinkPreferences.includes(drink) ? '✓' : ''}
+                    </button>
+                ))}
 
-            <p>Что-нибудь ещё?</p>
+                <p>🍷 Будешь пить алкоголь?</p>
 
-            <input
-                type="text"
-                placeholder="Например: лимонад"
-                value={customDrink}
-                onChange={(event) => setCustomDrink(event.target.value)}
-            />
+                <button onClick={() => setAlcohol('Да')}>
+                    Да {alcohol === 'Да' ? '✓' : ''}
+                </button>
 
-          <br />
-          <br />
+                <button onClick={() => setAlcohol('Нет')}>
+                    Нет {alcohol === 'Нет' ? '✓' : ''}
+                </button>
 
-          <p>Есть напитки, которые ты не пьёшь?</p>
+                <p>🚫 Есть напитки, которые ты не пьёшь?</p>
 
-          <input
-              type="text"
-              placeholder="Например: кофе"
-              value={drinkRestrictions}
-              onChange={(event) => setDrinkRestrictions(event.target.value)}
-          />
+                <input
+                    type="text"
+                    placeholder="Например: кофе"
+                    value={drinkRestrictions}
+                    onChange={(event) =>
+                        setDrinkRestrictions(event.target.value)
+                    }
+                />
 
-          <br />
-          <br />
+                <br />
+                <br />
 
-          <button onClick={() => setScreen('wishlist')}>
-            Дальше →
-          </button>
-        </main>
-    )
-  }
+                <button
+                    onClick={() => setScreen('wishlist')}
+                    disabled={!alcohol}
+                >
+                    Дальше →
+                </button>
+
+                <br />
+                <br />
+
+                <button onClick={() => setScreen('food')}>
+                    ← Назад
+                </button>
+            </main>
+        )
+    }
 
     if (screen === 'wishlist') {
         return (
@@ -362,10 +268,6 @@ function App() {
                     Если захочешь что-нибудь подарить,
                     вот мой небольшой список желаний.
                 </p>
-
-                {!wishlistLoaded && (
-                    <p>Загружаем список подарков...</p>
-                )}
 
                 {wishlistItems.map((item) => (
                     <div key={item.id}>
@@ -388,9 +290,9 @@ function App() {
 
                         <button
                             onClick={() => setSelectedGift(item.id)}
-                            disabled={item.reserved}
+                            disabled={reservedGifts.includes(item.id)}
                         >
-                            {item.reserved
+                            {reservedGifts.includes(item.id)
                                 ? '🎁 Уже выбран'
                                 : selectedGift === item.id
                                     ? '✓ Я выберу этот подарок'
@@ -401,8 +303,18 @@ function App() {
                     </div>
                 ))}
 
-                <button onClick={submitGuest}>
-                    Завершить →
+                <button
+                    onClick={submitGuest}
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? 'Отправляем...' : 'Завершить →'}
+                </button>
+
+                <br />
+                <br />
+
+                <button onClick={() => setScreen('drinks')}>
+                    ← Назад
                 </button>
             </main>
         )
@@ -446,8 +358,8 @@ function App() {
 
             <p>Буду рада видеть тебя на моём празднике 💌</p>
 
-            <p>📅 19 сентября</p>
-            <p>🕐 19:00</p>
+            <p>📅 26 сентября</p>
+            <p>🕐 17:00</p>
             <p>📍 Гродно</p>
 
             <p>Как тебя зовут?</p>
