@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+const API_URL = import.meta.env.VITE_API_URL
+
 const foodOptions = [
   '🍕 Пицца',
   '🍔 Бургеры',
@@ -46,27 +48,11 @@ function App() {
     const [guestsLoaded, setGuestsLoaded] = useState(false)
 
     useEffect(() => {
-        if (screen !== 'wishlist' || wishlistLoaded) {
-            return
-        }
-
-        fetch('http://localhost:3001/api/wishlist')
-            .then((response) => response.json())
-            .then((data) => {
-                setWishlistItems(data)
-                setWishlistLoaded(true)
-            })
-            .catch((error) => {
-                console.error('Ошибка загрузки вишлиста:', error)
-            })
-    }, [screen, wishlistLoaded])
-
-    useEffect(() => {
         if (!adminMode || guestsLoaded) {
             return
         }
 
-        fetch('http://localhost:3001/api/guests')
+        fetch(`${API_URL}/api/guests`)
             .then((response) => {
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`)
@@ -87,7 +73,7 @@ function App() {
 
     useEffect(() => {
         if (!wishlistLoaded && (screen === 'wishlist' || adminMode)) {
-            fetch('http://localhost:3001/api/wishlist')
+            fetch(`${API_URL}/api/wishlist`)
                 .then((response) => response.json())
                 .then((data) => {
                     setWishlistItems(data)
@@ -117,7 +103,7 @@ function App() {
 
         try {
             const response = await fetch(
-                'http://localhost:3001/api/guests',
+                `${API_URL}/api/guests`,
                 {
                     method: 'POST',
                     headers: {
