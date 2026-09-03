@@ -19,12 +19,20 @@ const drinkOptions = [
 ]
 
 function App() {
+    const adminMode = window.location.pathname === '/admin'
+
+    const [adminPassword, setAdminPassword] = useState('')
+    const [isAdmin, setIsAdmin] = useState(false)
+
     const [screen, setScreen] = useState('welcome')
 
     const [guestName, setGuestName] = useState('')
 
     const [foodPreferences, setFoodPreferences] = useState<string[]>([])
     const [drinkPreferences, setDrinkPreferences] = useState<string[]>([])
+
+    const [customFood, setCustomFood] = useState('')
+    const [customDrink, setCustomDrink] = useState('')
 
     const [foodRestrictions, setFoodRestrictions] = useState('')
     const [drinkRestrictions, setDrinkRestrictions] = useState('')
@@ -33,6 +41,9 @@ function App() {
 
     const [wishlistItems, setWishlistItems] = useState<any[]>([])
     const [wishlistLoaded, setWishlistLoaded] = useState(false)
+
+    const [guests, setGuests] = useState<any[]>([])
+    const [guestsLoaded, setGuestsLoaded] = useState(false)
 
     useEffect(() => {
         if (screen !== 'wishlist' || wishlistLoaded) {
@@ -50,12 +61,56 @@ function App() {
             })
     }, [screen, wishlistLoaded])
 
+    useEffect(() => {
+        if (!adminMode || guestsLoaded) {
+            return
+        }
+
+        fetch('http://localhost:3001/api/guests')
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`)
+                }
+
+                return response.json()
+            })
+            .then((data) => {
+                console.log('Гости загружены:', data)
+
+                setGuests(data)
+                setGuestsLoaded(true)
+            })
+            .catch((error) => {
+                console.error('Ошибка загрузки гостей:', error)
+            })
+    }, [adminMode, guestsLoaded])
+
+    useEffect(() => {
+        if (!wishlistLoaded && (screen === 'wishlist' || adminMode)) {
+            fetch('http://localhost:3001/api/wishlist')
+                .then((response) => response.json())
+                .then((data) => {
+                    setWishlistItems(data)
+                    setWishlistLoaded(true)
+                })
+                .catch((error) => {
+                    console.error('Ошибка загрузки вишлиста:', error)
+                })
+        }
+    }, [screen, adminMode, wishlistLoaded])
+
     const submitGuest = async () => {
         const guest = {
             name: guestName,
-            foodPreferences,
+            foodPreferences: [
+                ...foodPreferences,
+                ...(customFood.trim() ? [`✏️ ${customFood.trim()}`] : []),
+            ],
             foodRestrictions,
-            drinkPreferences,
+            drinkPreferences: [
+                ...drinkPreferences,
+                ...(customDrink.trim() ? [`✏️ ${customDrink.trim()}`] : []),
+            ],
             drinkRestrictions,
             selectedGift,
         }
@@ -104,6 +159,120 @@ function App() {
     )
   }
 
+    if (adminMode && !isAdmin) {
+        return (
+            <main>
+                <h1>🔐 Админка</h1>
+
+                <p>Введите пароль:</p>
+
+                <input
+                    type="password"
+                    value={adminPassword}
+                    onChange={(event) =>
+                        setAdminPassword(event.target.value)
+                    }
+                />
+
+                <br />
+                <br />
+
+                <button
+                    onClick={() => {
+                        if (adminPassword === '1234') {
+                            setIsAdmin(true)
+                        } else {
+                            alert('Неверный пароль')
+                        }
+                    }}
+                >
+                    Войти
+                </button>
+            </main>
+        )
+    }
+
+    if (adminMode && isAdmin) {
+        return (
+            <main>
+                <h1>🔐 Админка</h1>
+
+                <h2>👥 Гости</h2>
+
+                {!guestsLoaded && (
+                    <p>Загружаем гостей...</p>
+                )}
+
+                {guests.map((guest) => (
+                    <div key={guest.id}>
+                        <h3>{guest.name}</h3>
+
+                        <p>
+                            🍕 Еда:{' '}
+                            {JSON.parse(
+                                guest.food_preferences || '[]'
+                            ).join(', ')}
+                        </p>
+
+                        <p>
+                            🚫 Не ест:{' '}
+                            {guest.food_restrictions || '—'}
+                        </p>
+
+                        <p>
+                            🥤 Напитки:{' '}
+                            {JSON.parse(
+                                guest.drink_preferences || '[]'
+                            ).join(', ')}
+                        </p>
+
+                        <p>
+                            🚫 Не пьёт:{' '}
+                            {guest.drink_restrictions || '—'}
+                        </p>
+
+                        <p>
+                            🎁 Подарок ID:{' '}
+                            {guest.selected_gift || 'Не выбран'}
+                        </p>
+
+                        <p>
+                            📅 {guest.created_at}
+                        </p>
+
+                        <hr />
+                    </div>
+                ))}
+
+                <h2>🎁 Вишлист</h2>
+
+                {!wishlistLoaded && (
+                    <p>Загружаем вишлист...</p>
+                )}
+
+                {wishlistItems.map((item) => (
+                    <div key={item.id}>
+                        <h3>
+                            #{item.id} — {item.title}
+                        </h3>
+
+                        <p>{item.description}</p>
+
+                        <p>💰 {item.price} BYN</p>
+
+                        <p>
+                            {item.reserved
+                                ? '🔴 Подарок выбран'
+                                : '🟢 Подарок свободен'}
+                        </p>
+
+                        <hr />
+                    </div>
+                ))}
+            </main>
+        )
+    }
+
   if (screen === 'food') {
     return (
         <main>
@@ -119,6 +288,15 @@ function App() {
                 {food} {foodPreferences.includes(food) ? '✓' : ''}
               </button>
           ))}
+
+            <p>Что-нибудь ещё?</p>
+
+            <input
+                type="text"
+                placeholder="Например: паста"
+                value={customFood}
+                onChange={(event) => setCustomFood(event.target.value)}
+            />
 
           <br />
           <br />
@@ -157,6 +335,15 @@ function App() {
                 {drink} {drinkPreferences.includes(drink) ? '✓' : ''}
               </button>
           ))}
+
+            <p>Что-нибудь ещё?</p>
+
+            <input
+                type="text"
+                placeholder="Например: лимонад"
+                value={customDrink}
+                onChange={(event) => setCustomDrink(event.target.value)}
+            />
 
           <br />
           <br />
@@ -247,19 +434,16 @@ function App() {
                     прийти и хорошо провести время!
                 </p>
 
-                <p>
-                    🎁 Твой подарок:{' '}
-                    {selectedGift
-                        ? wishlistItems.find(
-                            (item) => item.id === selectedGift
-                        )?.title
-                        : 'ничего'}
-                </p>
+                {selectedGift ? (
+                    <p>🎁 Твой подарок №{selectedGift}</p>
+                ) : (
+                    <p>🎁 Подарок не выбран</p>
+                )}
 
                 <button
                     onClick={() =>
                         window.open(
-                            'https://t.me/ТВОЯ_ГРУППА',
+                            'https://t.me/+XkVCjp2GJ3E2ZWY6',
                             '_blank'
                         )
                     }
