@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 const foodOptions = [
   'Пицца',
@@ -16,30 +16,6 @@ const drinkOptions = [
   'Чай/кофе',
 ]
 
-const wishlistItems = [
-    {
-        id: 1,
-        title: 'Наушники',
-        description: 'Хорошие беспроводные наушники',
-        price: 150,
-        link: 'https://example.com',
-    },
-    {
-        id: 2,
-        title: 'Книга',
-        description: 'Книга, которую я давно хочу',
-        price: 40,
-        link: 'https://example.com',
-    },
-    {
-        id: 3,
-        title: 'Что-нибудь для дома',
-        description: 'На твой вкус ❤️',
-        price: 50,
-        link: 'https://example.com',
-    },
-]
-
 function App() {
     const [screen, setScreen] = useState('welcome')
     const [direction, setDirection] = useState<'forward' | 'back'>('forward')
@@ -54,11 +30,9 @@ function App() {
     const [foodRestrictions, setFoodRestrictions] = useState('')
     const [drinkRestrictions, setDrinkRestrictions] = useState('')
 
-    const [selectedGift, setSelectedGift] = useState<number | null>(null)
-
     const [alcohol, setAlcohol] = useState('')
 
-    const [reservedGifts, setReservedGifts] = useState<number[]>([])
+    const [bathhouse, setBathhouse] = useState('')
 
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -69,19 +43,6 @@ function App() {
         setDirection(nextDirection)
         setScreen(nextScreen)
     }
-
-    useEffect(() => {
-        fetch(
-            'https://script.google.com/macros/s/AKfycbyE5a5-bHr3f2u6cq9TS8tajLeitD3qaRwM8XNocZK9ioqelvxienaE7r7OXXpn1U5d/exec?action=gifts'
-        )
-            .then((response) => response.json())
-            .then((data) => {
-                setReservedGifts(data.reservedGifts || [])
-            })
-            .catch((error) => {
-                console.error('Ошибка загрузки подарков:', error)
-            })
-    }, [])
 
     const submitGuest = async () => {
         if (!guestName.trim()) {
@@ -103,33 +64,21 @@ function App() {
             drink: drinkPreferences.join(', '),
             alcohol: alcohol,
             drinkRestrictions: drinkRestrictions,
-            gift: selectedGift ? String(selectedGift) : '',
+            bathhouse: bathhouse,
         })
 
         try {
             const response = await fetch(
-                `https://script.google.com/macros/s/AKfycbyE5a5-bHr3f2u6cq9TS8tajLeitD3qaRwM8XNocZK9ioqelvxienaE7r7OXXpn1U5d/exec?${params.toString()}`
+                `https://script.google.com/macros/s/AKfycbyhFSvqlf-YGNzMK7p0P8wF0rmyf8hl0KgbWGrcLACgISK6kqVFPIkpl4MYp2NyXkDQ/exec?${params.toString()}`
             )
 
             const result = await response.json()
 
             if (result.ok) {
                 goToScreen('finish', 'forward')
-                return
-            }
-
-            if (result.error === 'gift_already_reserved') {
-                alert('К сожалению, этот подарок уже выбрал кто-то другой 🎁')
-
-                const giftsResponse = await fetch(
-                    'https://script.google.com/macros/s/AKfycbyE5a5-bHr3f2u6cq9TS8tajLeitD3qaRwM8XNocZK9ioqelvxienaE7r7OXXpn1U5d/exec?action=gifts'
-                )
-
-                const giftsData = await giftsResponse.json()
-
-                setReservedGifts(giftsData.reservedGifts || [])
+            } else {
+                alert('Не удалось отправить ответ. Попробуй ещё раз.')
                 setIsSubmitting(false)
-                setScreen('wishlist')
             }
         } catch (error) {
             console.error('Ошибка отправки:', error)
@@ -335,7 +284,7 @@ function App() {
 
                         <button
                             className="primary-button"
-                            onClick={() => goToScreen('wishlist', 'forward')}
+                            onClick={() => goToScreen('bathhouse', 'forward')}
                             disabled={!alcohol}
                         >
                             Дальше →
@@ -355,91 +304,51 @@ function App() {
         )
     }
 
-    if (screen === 'wishlist') {
+    if (screen === 'bathhouse') {
         return (
             <div className={`page ${direction}`}>
-                <main className="card wishlist-card">
+                <main className="card">
 
                     <p className="eyebrow">
-                        ПОСЛЕДНИЙ ШАГ
+                        ЧАСТЬ 3 ИЗ 3
                     </p>
 
-                    <h1>Вишлист</h1>
+                    <h1>Баня</h1>
 
-                    <p className="screen-description">
-                        Если захочешь что-нибудь подарить,
-                        вот мой небольшой список желаний.
-                    </p>
+                    <div className="form-section">
+                        <label>
+                            Пойдёшь с нами в баню?
+                        </label>
 
-                    <div className="wishlist">
+                        <div className="options-grid">
 
-                        {wishlistItems.map((item) => {
-                            const isReserved = reservedGifts.includes(item.id)
-                            const isSelected = selectedGift === item.id
+                            <button
+                                className={`option-button ${
+                                    bathhouse === 'Да' ? 'selected' : ''
+                                }`}
+                                onClick={() => setBathhouse('Да')}
+                            >
+                                <span>Да</span>
 
-                            return (
-                                <div
-                                    key={item.id}
-                                    className={`gift-card ${
-                                        isReserved ? 'reserved' : ''
-                                    } ${
-                                        isSelected ? 'selected' : ''
-                                    }`}
-                                >
+                                {bathhouse === 'Да' && (
+                                    <span className="check">✓</span>
+                                )}
+                            </button>
 
-                                    <div className="gift-info">
+                            <button
+                                className={`option-button ${
+                                    bathhouse === 'Нет' ? 'selected' : ''
+                                }`}
+                                onClick={() => setBathhouse('Нет')}
+                            >
+                                <span>Нет</span>
 
-                                        <div className="gift-number">
-                                            #{item.id}
-                                        </div>
+                                {bathhouse === 'Нет' && (
+                                    <span className="check">✓</span>
+                                )}
+                            </button>
 
-                                        <div>
-                                            <h2>{item.title}</h2>
-
-                                            <p>
-                                                {item.description}
-                                            </p>
-
-                                            <span className="gift-price">
-                                            ≈ {item.price} BYN
-                                        </span>
-                                        </div>
-
-                                    </div>
-
-                                    <div className="gift-actions">
-
-                                        <a
-                                            className="gift-link"
-                                            href={item.link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            Посмотреть →
-                                        </a>
-
-                                        <button
-                                            className={`gift-button ${
-                                                isSelected ? 'selected' : ''
-                                            }`}
-                                            onClick={() =>
-                                                setSelectedGift(item.id)
-                                            }
-                                            disabled={isReserved}
-                                        >
-                                            {isReserved
-                                                ? '🎁 Уже выбран'
-                                                : isSelected
-                                                    ? '✓ Выбран'
-                                                    : 'Я подарю это'}
-                                        </button>
-
-                                    </div>
-
-                                </div>
-                            )
-                        })}
-
+                        </div>
                     </div>
 
                     <div className="navigation-buttons">
@@ -447,7 +356,7 @@ function App() {
                         <button
                             className="primary-button"
                             onClick={submitGuest}
-                            disabled={isSubmitting}
+                            disabled={!bathhouse || isSubmitting}
                         >
                             {isSubmitting
                                 ? 'Отправляем...'
@@ -478,7 +387,7 @@ function App() {
                     </div>
 
                     <h1>
-                        Всё готово, {guestName}!
+                        Всё готово!
                     </h1>
 
                     <div className="finish-message">
@@ -510,18 +419,6 @@ function App() {
 
                     </div>
 
-                    <div className="selected-gift">
-                        {selectedGift ? (
-                            <>
-                                🎁 Ты выбрал(а) подарок №{selectedGift}
-                            </>
-                        ) : (
-                            <>
-                                🎁 Подарок не выбран
-                            </>
-                        )}
-                    </div>
-
                     <button
                         className="primary-button telegram-button"
                         onClick={() =>
@@ -533,6 +430,15 @@ function App() {
                     >
                         💬 Вступить в Telegram-группу
                     </button>
+
+                    <a
+                        className="primary-button wishlist-button"
+                        href="/party-invitation/wishlist.docx"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        🎁 Открыть вишлист
+                    </a>
 
                 </main>
             </div>
