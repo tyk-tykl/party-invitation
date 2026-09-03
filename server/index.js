@@ -110,6 +110,6 @@ app.get('/api/wishlist', (req, res) => {
     res.json(wishlist)
 })
 
-app.listen(PORT, () => {
-    console.log(`Server started on http://localhost:${PORT}`)
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server started on port ${PORT}`)
 })
