@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const foodOptions = [
   '🍕 Пицца',
@@ -18,30 +18,6 @@ const drinkOptions = [
   '🍵 Чай',
 ]
 
-const wishlistItems = [
-    {
-        id: 1,
-        title: 'Наушники',
-        description: 'Хорошие беспроводные наушники',
-        price: 150,
-        link: 'https://example.com',
-    },
-    {
-        id: 2,
-        title: 'Книга',
-        description: 'Книга, которую я давно хочу',
-        price: 40,
-        link: 'https://example.com',
-    },
-    {
-        id: 3,
-        title: 'Что-нибудь для дома',
-        description: 'На твой вкус ❤️',
-        price: 50,
-        link: 'https://example.com',
-    },
-]
-
 function App() {
     const [screen, setScreen] = useState('welcome')
 
@@ -54,6 +30,63 @@ function App() {
     const [drinkRestrictions, setDrinkRestrictions] = useState('')
 
     const [selectedGift, setSelectedGift] = useState<number | null>(null)
+
+    const [wishlistItems, setWishlistItems] = useState<any[]>([])
+    const [wishlistLoaded, setWishlistLoaded] = useState(false)
+
+    useEffect(() => {
+        if (screen !== 'wishlist' || wishlistLoaded) {
+            return
+        }
+
+        fetch('http://localhost:3001/api/wishlist')
+            .then((response) => response.json())
+            .then((data) => {
+                setWishlistItems(data)
+                setWishlistLoaded(true)
+            })
+            .catch((error) => {
+                console.error('Ошибка загрузки вишлиста:', error)
+            })
+    }, [screen, wishlistLoaded])
+
+    const submitGuest = async () => {
+        const guest = {
+            name: guestName,
+            foodPreferences,
+            foodRestrictions,
+            drinkPreferences,
+            drinkRestrictions,
+            selectedGift,
+        }
+
+        try {
+            const response = await fetch(
+                'http://localhost:3001/api/guests',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(guest),
+                }
+            )
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                alert(data.message)
+                return
+            }
+
+            console.log('Гость сохранён:', data)
+
+            setScreen('finish')
+        } catch (error) {
+            console.error('Ошибка отправки:', error)
+            alert('Не удалось сохранить ответы')
+        }
+    }
 
   const toggleFood = (food: string) => {
     setFoodPreferences((current) =>
@@ -147,7 +180,7 @@ function App() {
     )
   }
 
-  if (screen === 'wishlist') {
+    if (screen === 'wishlist') {
         return (
             <main>
                 <h1>🎁 Вишлист</h1>
@@ -156,6 +189,10 @@ function App() {
                     Если захочешь что-нибудь подарить,
                     вот мой небольшой список желаний.
                 </p>
+
+                {!wishlistLoaded && (
+                    <p>Загружаем список подарков...</p>
+                )}
 
                 {wishlistItems.map((item) => (
                     <div key={item.id}>
@@ -174,44 +211,64 @@ function App() {
                         </a>
 
                         <br />
+                        <br />
 
                         <button
                             onClick={() => setSelectedGift(item.id)}
+                            disabled={item.reserved}
                         >
-                            {selectedGift === item.id
-                                ? '✓ Я выберу этот подарок'
-                                : 'Я подарю это'}
+                            {item.reserved
+                                ? '🎁 Уже выбран'
+                                : selectedGift === item.id
+                                    ? '✓ Я выберу этот подарок'
+                                    : 'Я подарю это'}
                         </button>
 
                         <hr />
                     </div>
                 ))}
 
-                <button onClick={() => setScreen('finish')}>
+                <button onClick={submitGuest}>
                     Завершить →
                 </button>
             </main>
         )
-  }
+    }
 
-  if (screen === 'finish') {
-    return (
-        <main>
-          <h1>💌 Всё готово, {guestName}!</h1>
+    if (screen === 'finish') {
+        return (
+            <main>
+                <h1>💌 Всё готово, {guestName}!</h1>
 
-          <p>Спасибо, что заполнил(а) приглашение.</p>
+                <p>Спасибо, что заполнил(а) приглашение.</p>
 
-          <p>
-            Теперь осталось самое главное —
-            прийти и хорошо провести время!
-          </p>
+                <p>
+                    Теперь осталось самое главное —
+                    прийти и хорошо провести время!
+                </p>
 
-          <button>
-            💬 Вступить в Telegram
-          </button>
-        </main>
-    )
-  }
+                <p>
+                    🎁 Твой подарок:{' '}
+                    {selectedGift
+                        ? wishlistItems.find(
+                            (item) => item.id === selectedGift
+                        )?.title
+                        : 'ничего'}
+                </p>
+
+                <button
+                    onClick={() =>
+                        window.open(
+                            'https://t.me/ТВОЯ_ГРУППА',
+                            '_blank'
+                        )
+                    }
+                >
+                    💬 Вступить в Telegram
+                </button>
+            </main>
+        )
+    }
 
   return (
         <main>
