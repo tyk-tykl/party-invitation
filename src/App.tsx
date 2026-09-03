@@ -42,6 +42,7 @@ const wishlistItems = [
 
 function App() {
     const [screen, setScreen] = useState('welcome')
+    const [direction, setDirection] = useState<'forward' | 'back'>('forward')
 
     const [guestName, setGuestName] = useState('')
 
@@ -60,6 +61,14 @@ function App() {
     const [reservedGifts, setReservedGifts] = useState<number[]>([])
 
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const goToScreen = (
+        nextScreen: string,
+        nextDirection: 'forward' | 'back'
+    ) => {
+        setDirection(nextDirection)
+        setScreen(nextScreen)
+    }
 
     useEffect(() => {
         fetch(
@@ -105,7 +114,7 @@ function App() {
             const result = await response.json()
 
             if (result.ok) {
-                setScreen('finish')
+                goToScreen('finish', 'forward')
                 return
             }
 
@@ -148,43 +157,51 @@ function App() {
 
     if (screen === 'food') {
         return (
-            <main className="page">
-                <section className="card">
-                    <p className="eyebrow">ШАГ 1 ИЗ 3</p>
+            <div className={`page ${direction}`}>
+                <main className="card">
 
-                    <h1>🍕 Еда</h1>
-
-                    <p className="screen-description">
-                        Что ты будешь есть?
+                    <p className="eyebrow">
+                        ЧАСТЬ 1 ИЗ 3
                     </p>
 
-                    <div className="options-grid">
-                        {foodOptions.map((food) => (
-                            <button
-                                className={`option-button ${
-                                    foodPreferences.includes(food)
-                                        ? 'selected'
-                                        : ''
-                                }`}
-                                key={food}
-                                onClick={() => toggleFood(food)}
-                            >
-                                <span>{food}</span>
+                    <h1>Еда</h1>
 
-                                {foodPreferences.includes(food) && (
-                                    <span className="check">✓</span>
-                                )}
-                            </button>
-                        ))}
+                    <p className="screen-description">
+                        Расскажи, что тебе хотелось бы поесть на празднике.
+                    </p>
+
+                    <div className="form-section">
+                        <label>
+                            Что ты будешь есть?
+                        </label>
+
+                        <div className="options-grid">
+                            {foodOptions.map((food) => (
+                                <button
+                                    key={food}
+                                    className={`option-button ${
+                                        foodPreferences.includes(food)
+                                            ? 'selected'
+                                            : ''
+                                    }`}
+                                    onClick={() => toggleFood(food)}
+                                >
+                                    <span>{food}</span>
+
+                                    {foodPreferences.includes(food) && (
+                                        <span className="check">✓</span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="form-section">
-                        <label htmlFor="custom-food">
+                        <label>
                             Что-нибудь ещё?
                         </label>
 
                         <input
-                            id="custom-food"
                             type="text"
                             placeholder="Например: паста"
                             value={customFood}
@@ -195,12 +212,11 @@ function App() {
                     </div>
 
                     <div className="form-section">
-                        <label htmlFor="food-restrictions">
+                        <label>
                             Есть что-то, что ты не ешь?
                         </label>
 
                         <input
-                            id="food-restrictions"
                             type="text"
                             placeholder="Например: орехи"
                             value={foodRestrictions}
@@ -211,59 +227,73 @@ function App() {
                     </div>
 
                     <div className="navigation-buttons">
+
                         <button
                             className="primary-button"
-                            onClick={() => setScreen('drinks')}
+                            onClick={() => goToScreen('drinks', 'forward')}
                         >
                             Дальше →
                         </button>
 
                         <button
                             className="secondary-button"
-                            onClick={() => setScreen('welcome')}
+                            onClick={() => goToScreen('welcome', 'back')}
                         >
                             ← Назад
                         </button>
+
                     </div>
-                </section>
-            </main>
+
+                </main>
+            </div>
         )
     }
 
     if (screen === 'drinks') {
         return (
-            <main className="page">
-                <section className="card">
-                    <p className="eyebrow">ШАГ 2 ИЗ 3</p>
+            <div className={`page ${direction}`}>
+                <main className="card">
 
-                    <h1>🥤 Напитки</h1>
-
-                    <p className="screen-description">
-                        Что ты будешь пить?
+                    <p className="eyebrow">
+                        ЧАСТЬ 2 ИЗ 3
                     </p>
 
-                    <div className="options-grid">
-                        {drinkOptions.map((drink) => (
-                            <button
-                                className={`option-button ${
-                                    drinkPreferences.includes(drink)
-                                        ? 'selected'
-                                        : ''
-                                }`}
-                                key={drink}
-                                onClick={() => toggleDrink(drink)}
-                            >
-                                <span>{drink}</span>
+                    <h1>Напитки</h1>
 
-                                {drinkPreferences.includes(drink) && (
-                                    <span className="check">✓</span>
-                                )}
-                            </button>
-                        ))}
+                    <p className="screen-description">
+                        Выбери напитки, которые ты хотел(а) бы видеть на празднике.
+                    </p>
+
+                    <div className="form-section">
+                        <label>
+                            Что ты будешь пить?
+                        </label>
+
+                        <div className="options-grid">
+                            {drinkOptions.map((drink) => (
+                                <button
+                                    key={drink}
+                                    className={`option-button ${
+                                        drinkPreferences.includes(drink)
+                                            ? 'selected'
+                                            : ''
+                                    }`}
+                                    onClick={() => toggleDrink(drink)}
+                                >
+                                    <span>{drink}</span>
+
+                                    {drinkPreferences.includes(drink) && (
+                                        <span className="check">✓</span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="form-section">
-                        <label>🍷 Будешь пить алкоголь?</label>
+                        <label>
+                            🍷 Будешь пить алкоголь?
+                        </label>
 
                         <div className="options-grid">
                             <button
@@ -295,12 +325,11 @@ function App() {
                     </div>
 
                     <div className="form-section">
-                        <label htmlFor="drink-restrictions">
-                            🚫 Есть напитки, которые ты не пьёшь?
+                        <label>
+                            Есть напитки, которые ты не пьёшь?
                         </label>
 
                         <input
-                            id="drink-restrictions"
                             type="text"
                             placeholder="Например: кофе"
                             value={drinkRestrictions}
@@ -311,9 +340,10 @@ function App() {
                     </div>
 
                     <div className="navigation-buttons">
+
                         <button
                             className="primary-button"
-                            onClick={() => setScreen('wishlist')}
+                            onClick={() => goToScreen('wishlist', 'forward')}
                             disabled={!alcohol}
                         >
                             Дальше →
@@ -321,23 +351,28 @@ function App() {
 
                         <button
                             className="secondary-button"
-                            onClick={() => setScreen('food')}
+                            onClick={() => goToScreen('food', 'back')}
                         >
                             ← Назад
                         </button>
+
                     </div>
-                </section>
-            </main>
+
+                </main>
+            </div>
         )
     }
 
     if (screen === 'wishlist') {
         return (
-            <main className="page">
-                <section className="card wishlist-card">
-                    <p className="eyebrow">ШАГ 3 ИЗ 3</p>
+            <div className={`page ${direction}`}>
+                <main className="card wishlist-card">
 
-                    <h1>🎁 Вишлист</h1>
+                    <p className="eyebrow">
+                        ПОСЛЕДНИЙ ШАГ
+                    </p>
+
+                    <h1>Вишлист</h1>
 
                     <p className="screen-description">
                         Если захочешь что-нибудь подарить,
@@ -345,39 +380,48 @@ function App() {
                     </p>
 
                     <div className="wishlist">
+
                         {wishlistItems.map((item) => {
                             const isReserved = reservedGifts.includes(item.id)
                             const isSelected = selectedGift === item.id
 
                             return (
                                 <div
-                                    className={`gift-card ${
-                                        isSelected ? 'selected' : ''
-                                    } ${isReserved ? 'reserved' : ''}`}
                                     key={item.id}
+                                    className={`gift-card ${
+                                        isReserved ? 'reserved' : ''
+                                    } ${
+                                        isSelected ? 'selected' : ''
+                                    }`}
                                 >
+
                                     <div className="gift-info">
+
                                         <div className="gift-number">
-                                            №{item.id}
+                                            #{item.id}
                                         </div>
 
                                         <div>
                                             <h2>{item.title}</h2>
 
-                                            <p>{item.description}</p>
+                                            <p>
+                                                {item.description}
+                                            </p>
 
                                             <span className="gift-price">
                                             ≈ {item.price} BYN
                                         </span>
                                         </div>
+
                                     </div>
 
                                     <div className="gift-actions">
+
                                         <a
+                                            className="gift-link"
                                             href={item.link}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="gift-link"
                                         >
                                             Посмотреть →
                                         </a>
@@ -394,16 +438,20 @@ function App() {
                                             {isReserved
                                                 ? '🎁 Уже выбран'
                                                 : isSelected
-                                                    ? '✓ Я выберу этот подарок'
+                                                    ? '✓ Выбран'
                                                     : 'Я подарю это'}
                                         </button>
+
                                     </div>
+
                                 </div>
                             )
                         })}
+
                     </div>
 
                     <div className="navigation-buttons">
+
                         <button
                             className="primary-button"
                             onClick={submitGuest}
@@ -416,20 +464,23 @@ function App() {
 
                         <button
                             className="secondary-button"
-                            onClick={() => setScreen('drinks')}
+                            onClick={() => goToScreen('drinks', 'back')}
                         >
                             ← Назад
                         </button>
+
                     </div>
-                </section>
-            </main>
+
+                </main>
+            </div>
         )
     }
 
     if (screen === 'finish') {
         return (
-            <main className="page">
-                <section className="card finish-card">
+            <div className={`page ${direction}`}>
+                <main className="card finish-card">
+
                     <div className="finish-icon">
                         💌
                     </div>
@@ -444,11 +495,12 @@ function App() {
                         </p>
 
                         <strong>
-                            прийти и хорошо провести время! 🎉
+                            прийти и хорошо провести время! ❤️
                         </strong>
                     </div>
 
                     <div className="finish-details">
+
                         <div>
                             <span>📅</span>
                             <p>26 сентября</p>
@@ -463,17 +515,20 @@ function App() {
                             <span>📍</span>
                             <p>Гродно</p>
                         </div>
+
                     </div>
 
-                    {selectedGift ? (
-                        <div className="selected-gift">
-                            🎁 Ты выбрал(а) подарок №{selectedGift}
-                        </div>
-                    ) : (
-                        <div className="selected-gift">
-                            🎁 Подарок не выбран
-                        </div>
-                    )}
+                    <div className="selected-gift">
+                        {selectedGift ? (
+                            <>
+                                🎁 Ты выбрал(а) подарок №{selectedGift}
+                            </>
+                        ) : (
+                            <>
+                                🎁 Подарок не выбран
+                            </>
+                        )}
+                    </div>
 
                     <button
                         className="primary-button telegram-button"
@@ -486,23 +541,30 @@ function App() {
                     >
                         💬 Вступить в Telegram
                     </button>
-                </section>
-            </main>
+
+                </main>
+            </div>
         )
     }
 
     return (
-        <main className="page">
-            <section className="card welcome-card">
-                <p className="eyebrow">ПРИГЛАШЕНИЕ</p>
+        <div className={`page ${direction}`}>
+            <main className="card welcome-card">
 
-                <h1>Ты приглашён!</h1>
+                <p className="eyebrow">
+                    ПРИГЛАШЕНИЕ
+                </p>
+
+                <h1>
+                    Ты приглашён!
+                </h1>
 
                 <p className="subtitle">
                     Буду рада видеть тебя на моём празднике 💌
                 </p>
 
-                <div className="event-info">
+                <div className="finish-details">
+
                     <div>
                         <span>📅</span>
                         <strong>26 сентября</strong>
@@ -517,15 +579,16 @@ function App() {
                         <span>📍</span>
                         <strong>Гродно</strong>
                     </div>
+
                 </div>
 
                 <div className="form-section">
-                    <label htmlFor="guest-name">
+
+                    <label>
                         Как тебя зовут?
                     </label>
 
                     <input
-                        id="guest-name"
                         type="text"
                         placeholder="Твоё имя"
                         value={guestName}
@@ -533,17 +596,23 @@ function App() {
                             setGuestName(event.target.value)
                         }
                     />
+
                 </div>
 
-                <button
-                    className="primary-button"
-                    onClick={() => setScreen('food')}
-                    disabled={!guestName.trim()}
-                >
-                    Открыть приглашение
-                </button>
-            </section>
-        </main>
+                <div className="navigation-buttons">
+
+                    <button
+                        className="primary-button"
+                        onClick={() => goToScreen('food', 'forward')}
+                        disabled={!guestName.trim()}
+                    >
+                        Открыть приглашение →
+                    </button>
+
+                </div>
+
+            </main>
+        </div>
     )
 }
 
