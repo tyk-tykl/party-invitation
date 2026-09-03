@@ -146,208 +146,347 @@ function App() {
     )
   }
 
+    if (screen === 'food') {
+        return (
+            <main className="page">
+                <section className="card">
+                    <p className="eyebrow">ШАГ 1 ИЗ 3</p>
 
+                    <h1>🍕 Еда</h1>
 
-  if (screen === 'food') {
-    return (
-        <main>
-          <h1>🍕 Еда</h1>
+                    <p className="screen-description">
+                        Что ты будешь есть?
+                    </p>
 
-          <p>Что ты будешь есть?</p>
+                    <div className="options-grid">
+                        {foodOptions.map((food) => (
+                            <button
+                                className={`option-button ${
+                                    foodPreferences.includes(food)
+                                        ? 'selected'
+                                        : ''
+                                }`}
+                                key={food}
+                                onClick={() => toggleFood(food)}
+                            >
+                                <span>{food}</span>
 
-          {foodOptions.map((food) => (
-              <button
-                  key={food}
-                  onClick={() => toggleFood(food)}
-              >
-                {food} {foodPreferences.includes(food) ? '✓' : ''}
-              </button>
-          ))}
+                                {foodPreferences.includes(food) && (
+                                    <span className="check">✓</span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
 
-            <p>Что-нибудь ещё?</p>
+                    <div className="form-section">
+                        <label htmlFor="custom-food">
+                            Что-нибудь ещё?
+                        </label>
 
-            <input
-                type="text"
-                placeholder="Например: паста"
-                value={customFood}
-                onChange={(event) => setCustomFood(event.target.value)}
-            />
+                        <input
+                            id="custom-food"
+                            type="text"
+                            placeholder="Например: паста"
+                            value={customFood}
+                            onChange={(event) =>
+                                setCustomFood(event.target.value)
+                            }
+                        />
+                    </div>
 
-          <br />
-          <br />
+                    <div className="form-section">
+                        <label htmlFor="food-restrictions">
+                            Есть что-то, что ты не ешь?
+                        </label>
 
-          <p>Есть что-то, что ты не ешь?</p>
+                        <input
+                            id="food-restrictions"
+                            type="text"
+                            placeholder="Например: орехи"
+                            value={foodRestrictions}
+                            onChange={(event) =>
+                                setFoodRestrictions(event.target.value)
+                            }
+                        />
+                    </div>
 
-          <input
-              type="text"
-              placeholder="Например: орехи"
-              value={foodRestrictions}
-              onChange={(event) => setFoodRestrictions(event.target.value)}
-          />
+                    <div className="navigation-buttons">
+                        <button
+                            className="primary-button"
+                            onClick={() => setScreen('drinks')}
+                        >
+                            Дальше →
+                        </button>
 
-          <br />
-          <br />
-
-            <button onClick={() => setScreen('drinks')}>
-                Дальше →
-            </button>
-
-            <br />
-            <br />
-
-            <button onClick={() => setScreen('welcome')}>
-                ← Назад
-            </button>
-        </main>
-    )
-  }
+                        <button
+                            className="secondary-button"
+                            onClick={() => setScreen('welcome')}
+                        >
+                            ← Назад
+                        </button>
+                    </div>
+                </section>
+            </main>
+        )
+    }
 
     if (screen === 'drinks') {
         return (
-            <main>
-                <h1>🥤 Напитки</h1>
+            <main className="page">
+                <section className="card">
+                    <p className="eyebrow">ШАГ 2 ИЗ 3</p>
 
-                <p>Что ты будешь пить?</p>
+                    <h1>🥤 Напитки</h1>
 
-                {drinkOptions.map((drink) => (
-                    <button
-                        key={drink}
-                        onClick={() => toggleDrink(drink)}
-                    >
-                        {drink} {drinkPreferences.includes(drink) ? '✓' : ''}
-                    </button>
-                ))}
+                    <p className="screen-description">
+                        Что ты будешь пить?
+                    </p>
 
-                <p>🍷 Будешь пить алкоголь?</p>
+                    <div className="options-grid">
+                        {drinkOptions.map((drink) => (
+                            <button
+                                className={`option-button ${
+                                    drinkPreferences.includes(drink)
+                                        ? 'selected'
+                                        : ''
+                                }`}
+                                key={drink}
+                                onClick={() => toggleDrink(drink)}
+                            >
+                                <span>{drink}</span>
 
-                <button onClick={() => setAlcohol('Да')}>
-                    Да {alcohol === 'Да' ? '✓' : ''}
-                </button>
+                                {drinkPreferences.includes(drink) && (
+                                    <span className="check">✓</span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
 
-                <button onClick={() => setAlcohol('Нет')}>
-                    Нет {alcohol === 'Нет' ? '✓' : ''}
-                </button>
+                    <div className="form-section">
+                        <label>🍷 Будешь пить алкоголь?</label>
 
-                <p>🚫 Есть напитки, которые ты не пьёшь?</p>
+                        <div className="options-grid">
+                            <button
+                                className={`option-button ${
+                                    alcohol === 'Да' ? 'selected' : ''
+                                }`}
+                                onClick={() => setAlcohol('Да')}
+                            >
+                                <span>Да</span>
 
-                <input
-                    type="text"
-                    placeholder="Например: кофе"
-                    value={drinkRestrictions}
-                    onChange={(event) =>
-                        setDrinkRestrictions(event.target.value)
-                    }
-                />
+                                {alcohol === 'Да' && (
+                                    <span className="check">✓</span>
+                                )}
+                            </button>
 
-                <br />
-                <br />
+                            <button
+                                className={`option-button ${
+                                    alcohol === 'Нет' ? 'selected' : ''
+                                }`}
+                                onClick={() => setAlcohol('Нет')}
+                            >
+                                <span>Нет</span>
 
-                <button
-                    onClick={() => setScreen('wishlist')}
-                    disabled={!alcohol}
-                >
-                    Дальше →
-                </button>
+                                {alcohol === 'Нет' && (
+                                    <span className="check">✓</span>
+                                )}
+                            </button>
+                        </div>
+                    </div>
 
-                <br />
-                <br />
+                    <div className="form-section">
+                        <label htmlFor="drink-restrictions">
+                            🚫 Есть напитки, которые ты не пьёшь?
+                        </label>
 
-                <button onClick={() => setScreen('food')}>
-                    ← Назад
-                </button>
+                        <input
+                            id="drink-restrictions"
+                            type="text"
+                            placeholder="Например: кофе"
+                            value={drinkRestrictions}
+                            onChange={(event) =>
+                                setDrinkRestrictions(event.target.value)
+                            }
+                        />
+                    </div>
+
+                    <div className="navigation-buttons">
+                        <button
+                            className="primary-button"
+                            onClick={() => setScreen('wishlist')}
+                            disabled={!alcohol}
+                        >
+                            Дальше →
+                        </button>
+
+                        <button
+                            className="secondary-button"
+                            onClick={() => setScreen('food')}
+                        >
+                            ← Назад
+                        </button>
+                    </div>
+                </section>
             </main>
         )
     }
 
     if (screen === 'wishlist') {
         return (
-            <main>
-                <h1>🎁 Вишлист</h1>
+            <main className="page">
+                <section className="card wishlist-card">
+                    <p className="eyebrow">ШАГ 3 ИЗ 3</p>
 
-                <p>
-                    Если захочешь что-нибудь подарить,
-                    вот мой небольшой список желаний.
-                </p>
+                    <h1>🎁 Вишлист</h1>
 
-                {wishlistItems.map((item) => (
-                    <div key={item.id}>
-                        <h2>{item.title}</h2>
+                    <p className="screen-description">
+                        Если захочешь что-нибудь подарить,
+                        вот мой небольшой список желаний.
+                    </p>
 
-                        <p>{item.description}</p>
+                    <div className="wishlist">
+                        {wishlistItems.map((item) => {
+                            const isReserved = reservedGifts.includes(item.id)
+                            const isSelected = selectedGift === item.id
 
-                        <p>≈ {item.price} BYN</p>
+                            return (
+                                <div
+                                    className={`gift-card ${
+                                        isSelected ? 'selected' : ''
+                                    } ${isReserved ? 'reserved' : ''}`}
+                                    key={item.id}
+                                >
+                                    <div className="gift-info">
+                                        <div className="gift-number">
+                                            №{item.id}
+                                        </div>
 
-                        <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Посмотреть
-                        </a>
+                                        <div>
+                                            <h2>{item.title}</h2>
 
-                        <br />
-                        <br />
+                                            <p>{item.description}</p>
 
+                                            <span className="gift-price">
+                                            ≈ {item.price} BYN
+                                        </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="gift-actions">
+                                        <a
+                                            href={item.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="gift-link"
+                                        >
+                                            Посмотреть →
+                                        </a>
+
+                                        <button
+                                            className={`gift-button ${
+                                                isSelected ? 'selected' : ''
+                                            }`}
+                                            onClick={() =>
+                                                setSelectedGift(item.id)
+                                            }
+                                            disabled={isReserved}
+                                        >
+                                            {isReserved
+                                                ? '🎁 Уже выбран'
+                                                : isSelected
+                                                    ? '✓ Я выберу этот подарок'
+                                                    : 'Я подарю это'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    <div className="navigation-buttons">
                         <button
-                            onClick={() => setSelectedGift(item.id)}
-                            disabled={reservedGifts.includes(item.id)}
+                            className="primary-button"
+                            onClick={submitGuest}
+                            disabled={isSubmitting}
                         >
-                            {reservedGifts.includes(item.id)
-                                ? '🎁 Уже выбран'
-                                : selectedGift === item.id
-                                    ? '✓ Я выберу этот подарок'
-                                    : 'Я подарю это'}
+                            {isSubmitting
+                                ? 'Отправляем...'
+                                : 'Завершить →'}
                         </button>
 
-                        <hr />
+                        <button
+                            className="secondary-button"
+                            onClick={() => setScreen('drinks')}
+                        >
+                            ← Назад
+                        </button>
                     </div>
-                ))}
-
-                <button
-                    onClick={submitGuest}
-                    disabled={isSubmitting}
-                >
-                    {isSubmitting ? 'Отправляем...' : 'Завершить →'}
-                </button>
-
-                <br />
-                <br />
-
-                <button onClick={() => setScreen('drinks')}>
-                    ← Назад
-                </button>
+                </section>
             </main>
         )
     }
 
     if (screen === 'finish') {
         return (
-            <main>
-                <h1>💌 Всё готово, {guestName}!</h1>
+            <main className="page">
+                <section className="card finish-card">
+                    <div className="finish-icon">
+                        💌
+                    </div>
 
-                <p>Спасибо, что заполнил(а) приглашение.</p>
+                    <h1>
+                        Всё готово, {guestName}!
+                    </h1>
 
-                <p>
-                    Теперь осталось самое главное —
-                    прийти и хорошо провести время!
-                </p>
+                    <div className="finish-message">
+                        <p>
+                            Теперь осталось самое главное —
+                        </p>
 
-                {selectedGift ? (
-                    <p>🎁 Твой подарок №{selectedGift}</p>
-                ) : (
-                    <p>🎁 Подарок не выбран</p>
-                )}
+                        <strong>
+                            прийти и хорошо провести время! 🎉
+                        </strong>
+                    </div>
 
-                <button
-                    onClick={() =>
-                        window.open(
-                            'https://t.me/+XkVCjp2GJ3E2ZWY6',
-                            '_blank'
-                        )
-                    }
-                >
-                    💬 Вступить в Telegram
-                </button>
+                    <div className="finish-details">
+                        <div>
+                            <span>📅</span>
+                            <p>26 сентября</p>
+                        </div>
+
+                        <div>
+                            <span>🕐</span>
+                            <p>17:00</p>
+                        </div>
+
+                        <div>
+                            <span>📍</span>
+                            <p>Гродно</p>
+                        </div>
+                    </div>
+
+                    {selectedGift ? (
+                        <div className="selected-gift">
+                            🎁 Ты выбрал(а) подарок №{selectedGift}
+                        </div>
+                    ) : (
+                        <div className="selected-gift">
+                            🎁 Подарок не выбран
+                        </div>
+                    )}
+
+                    <button
+                        className="primary-button telegram-button"
+                        onClick={() =>
+                            window.open(
+                                'https://t.me/+XkVCjp2GJ3E2ZWY6',
+                                '_blank'
+                            )
+                        }
+                    >
+                        💬 Вступить в Telegram
+                    </button>
+                </section>
             </main>
         )
     }
