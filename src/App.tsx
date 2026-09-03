@@ -166,13 +166,9 @@ function App() {
 
                     <h1>Еда</h1>
 
-                    <p className="screen-description">
-                        Расскажи, что тебе хотелось бы поесть на празднике.
-                    </p>
-
                     <div className="form-section">
                         <label>
-                            Что ты будешь есть?
+                            Что будешь есть?
                         </label>
 
                         <div className="options-grid">
@@ -260,13 +256,9 @@ function App() {
 
                     <h1>Напитки</h1>
 
-                    <p className="screen-description">
-                        Выбери напитки, которые ты хотел(а) бы видеть на празднике.
-                    </p>
-
                     <div className="form-section">
                         <label>
-                            Что ты будешь пить?
+                            Что будешь пить?
                         </label>
 
                         <div className="options-grid">
@@ -539,7 +531,7 @@ function App() {
                             )
                         }
                     >
-                        💬 Вступить в Telegram
+                        💬 Вступить в Telegram-группу
                     </button>
 
                 </main>
@@ -556,11 +548,11 @@ function App() {
                 </p>
 
                 <h1>
-                    Ты приглашён!
+                    Hi, bro!
                 </h1>
 
                 <p className="subtitle">
-                    Буду рада видеть тебя на моём празднике 💌
+                    Буду рада видеть тебя на нашем междусобойчике)
                 </p>
 
                 <div className="finish-details">
@@ -585,7 +577,7 @@ function App() {
                 <div className="form-section">
 
                     <label>
-                        Как тебя зовут?
+                        Обозначь себя:
                     </label>
 
                     <input
